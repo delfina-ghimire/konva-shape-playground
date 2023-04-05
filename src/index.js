@@ -1,11 +1,34 @@
-import { Box, Button, ChakraProvider, Flex, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, useDisclosure } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Stage, Layer, Rect, Circle, Transformer, Text } from "react-konva";
-
+import {
+  Stage,
+  Layer,
+  Rect,
+  Circle,
+  Transformer,
+  Text,
+  Group,
+} from "react-konva";
 import { extendTheme } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Flex,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Select,
+  useDisclosure,
+} from "@chakra-ui/react";
 
-// 2. Call `extendTheme` and pass your custom values
 const theme = extendTheme({
   colors: {
     primary: {
@@ -22,18 +45,11 @@ const theme = extendTheme({
 const MIN_POS = 50;
 const MAX_POS = window.innerHeight - 100;
 
-const DEFAULT_HEIGHT = 100
-const DEFAULT_WIDTH = 100
-const DEFAULT_RADIUS = 100
+const DEFAULT_HEIGHT = 100;
+const DEFAULT_WIDTH = 100;
+const DEFAULT_RADIUS = 100;
+const DEFAULT_CAPACITY = 10;
 
-function getRandomColor() {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
 
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
@@ -56,48 +72,64 @@ const MyCircle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 
   return (
     <React.Fragment>
-    
-      <Circle
-        x={200}
-        y={100}
-        radius={50}
-        fill="green"
-        draggable
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={shapeRef}
-        {...shapeProps}
-        onTransformEnd={(e) => {
-          // transformer is changing scale of the node
-          // and NOT its width or height
-          // but in the store we have only width and height
-          // to match the data better we will reset scale on transform end
-          const node = shapeRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
+      <Group draggable>
+        <Circle
+          x={200}
+          y={100}
+          radius={50}
+          fill="green"
+          draggable
+          onClick={onSelect}
+          onTap={onSelect}
+          ref={shapeRef}
+          {...shapeProps}
+          onDragEnd={(e) => {
+            onChange({
+              ...shapeProps,
+              x: e.target.x(),
+              y: e.target.y(),
+            });
+          }}
+          onTransformEnd={(e) => {
+            // transformer is changing scale of the node
+            // and NOT its width or height
+            // but in the store we have only width and height
+            // to match the data better we will reset scale on transform end
+            const node = shapeRef.current;
+            const scaleX = node.scaleX();
+            const scaleY = node.scaleY();
 
-          onChange({
-            ...shapeProps,
-            x: node.x(),
-            y: node.y(),
-            width: node.width() * scaleX,
-            height: node.height() * scaleY
-          });
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          rotateEnabled={false}
-          boundBoxFunc={(oldBox, newBox) => {
-            // limit resize
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
+            onChange({
+              ...shapeProps,
+              x: node.x(),
+              y: node.y(),
+              width: node.width() * scaleX,
+              height: node.height() * scaleY,
+            });
           }}
         />
-      )}
+        {isSelected && (
+          <Transformer
+            ref={trRef}
+            rotateEnabled={false}
+            boundBoxFunc={(oldBox, newBox) => {
+              // limit resize
+
+              return newBox;
+            }}
+          />
+        )}
+        <Text
+          text={`Capacity ${shapeProps.capacity}`}
+          fontSize={14}
+          fontFamily="Calibri"
+          fill="gray"
+          width={shapeProps.width}
+          height={shapeProps.height}
+          x={shapeProps.x - shapeProps.width / 2 + 30}
+          y={shapeProps.y + shapeProps.height / 2 - 30}
+        ></Text>
+      </Group>
     </React.Fragment>
   );
 };
@@ -105,65 +137,75 @@ const MyCircle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
+  const textRef = React.useRef();
 
   React.useEffect(() => {
     if (isSelected) {
       // we need to attach transformer manually
-      trRef.current.nodes([shapeRef.current]);
+      trRef.current.nodes([shapeRef.current, textRef.current]);
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
 
   return (
     <React.Fragment>
-      <Rect
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={shapeRef}
-        {...shapeProps}
-        draggable
-        onDragEnd={(e) => {
-          onChange({
-            ...shapeProps,
-            x: e.target.x(),
-            y: e.target.y()
-          });
-        }}
-        onTransformEnd={(e) => {
-          // transformer is changing scale of the node
-          // and NOT its width or height
-          // but in the store we have only width and height
-          // to match the data better we will reset scale on transform end
-          const node = shapeRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
+      <Group draggable>
+        <Rect
+          onClick={onSelect}
+          onTap={onSelect}
+          ref={shapeRef}
+          {...shapeProps}
+          draggable
+          cornerRadius={24}
+          onDragEnd={(e) => {
+            onChange({
+              ...shapeProps,
+              x: e.target.x(),
+              y: e.target.y(),
+            });
+          }}
+          onTransformEnd={(e) => {
+            // transformer is changing scale of the node
+            // and NOT its width or height
+            // but in the store we have only width and height
+            // to match the data better we will reset scale on transform end
+            const node = shapeRef.current;
+            const scaleX = node.scaleX();
+            const scaleY = node.scaleY();
 
-          // we will reset it back
-          node.scaleX(1);
-          node.scaleY(1);
-          onChange({
-            ...shapeProps,
-            x: node.x(),
-            y: node.y(),
-            // set minimal value
-            width: node.width() * scaleX,
-            height: node.height() * scaleY
-          });
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          rotateEnabled={false}
-          boundBoxFunc={(oldBox, newBox) => {
-            // limit resize
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
+            // we will reset it back
+            node.scaleX(1);
+            node.scaleY(1);
+            onChange({
+              ...shapeProps,
+              x: node.x(),
+              y: node.y(),
+              // set minimal value
+              width: node.width() * scaleX,
+              height: node.height() * scaleY,
+            });
           }}
         />
-      )}
+        {isSelected && (
+          <Transformer
+            ref={trRef}
+            rotateEnabled={false}
+            boundBoxFunc={(oldBox, newBox) => {
+              return newBox;
+            }}
+          />
+        )}
+        <Text
+          text={`Capacity ${shapeProps.capacity}`}
+          fontSize={14}
+          fontFamily="Calibri"
+          fill="gray"
+          width={150}
+          x={shapeProps.x + 10}
+          y={shapeProps.y + shapeProps.height - 20}
+          ref={textRef}
+        ></Text>
+      </Group>
     </React.Fragment>
   );
 };
@@ -172,17 +214,19 @@ const App = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [rectangles, setRectangles] = React.useState([]);
   const [circles, setCircles] = React.useState([]);
-  const [selectedShape, setSelectedShape] = React.useState('')
+  const [selectedShape, setSelectedShape] = React.useState("");
   const [rectangleShape, setRectangleShape] = React.useState({
     height: DEFAULT_HEIGHT,
     width: DEFAULT_WIDTH,
-    fill: 'red'
-  })
+    fill: "white",
+    capacity: DEFAULT_CAPACITY,
+  });
 
-   const [circleShape, setCircleShape] = React.useState({
+  const [circleShape, setCircleShape] = React.useState({
     radius: DEFAULT_RADIUS,
-    fill: 'red'
-  })
+    fill: "white",
+    capacity: DEFAULT_CAPACITY,
+  });
 
   const [selectedObj, setSelectedObj] = React.useState({});
 
@@ -205,8 +249,9 @@ const App = () => {
             width: circleShape.radius,
             height: circleShape.radius,
             fill: circleShape.fill,
-            id: crypto.randomUUID()
-          }
+            id: crypto.randomUUID(),
+            capacity: circleShape.capacity,
+          },
         ]);
         return;
 
@@ -219,8 +264,9 @@ const App = () => {
             width: rectangleShape.width,
             height: rectangleShape.height,
             fill: rectangleShape.fill,
-            id: crypto.randomUUID()
-          }
+            id: crypto.randomUUID(),
+            capacity: rectangleShape.capacity,
+          },
         ]);
         return;
 
@@ -266,8 +312,8 @@ const App = () => {
           {
             id: crypto.randomUUID(),
             x: selectedObj.x + (selectedObj.width ?? 0) / 2,
-            y: selectedObj.y + (selectedObj.height ?? 0) / 2
-          }
+            y: selectedObj.y + (selectedObj.height ?? 0) / 2,
+          },
         ]);
         return;
 
@@ -289,8 +335,8 @@ const App = () => {
             height: selectedObj.height ?? selectedCircle.height,
             width: selectedObj.height ?? selectedCircle.height,
             x: selectedObj.x - (selectedObj.width ?? 0) / 2,
-            y: selectedObj.y - (selectedObj.height ?? 0) / 2
-          }
+            y: selectedObj.y - (selectedObj.height ?? 0) / 2,
+          },
         ]);
         return;
 
@@ -347,14 +393,15 @@ const App = () => {
                     />
                   </Box>
                   <Box>
-                    <FormLabel>Color</FormLabel>
+                    <FormLabel>Capacity</FormLabel>
 
                     <Input
-                      type="color"
+                      placeholder={10}
+                      type="number"
                       onChange={(e) => {
                         setRectangleShape((prev) => ({
                           ...prev,
-                          fill: e.target.value,
+                          capacity: e.target.value,
                         }));
                       }}
                     />
@@ -376,16 +423,20 @@ const App = () => {
                       }}
                     />
                   </Box>
+                  <Box>
+                    <FormLabel>Capacity</FormLabel>
 
-                  <Input
-                    type="color"
-                    onChange={(e) => {
-                      setCircleShape((prev) => ({
-                        ...prev,
-                        fill: e.target.value,
-                      }));
-                    }}
-                  />
+                    <Input
+                      placeholder={10}
+                      type="number"
+                      onChange={(e) => {
+                        setCircleShape((prev) => ({
+                          ...prev,
+                          capacity: e.target.value,
+                        }));
+                      }}
+                    />
+                  </Box>
                 </Flex>
               ) : null}
             </Box>
@@ -425,32 +476,48 @@ const App = () => {
             backgroundColor: "ButtonHighlight",
             padding: "10px",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             gap: 10,
           }}
         >
-          <Button
-            bg="primary.main"
-            color="white"
-            onClick={onOpen}
-            variant="solid"
+          <Heading as="h2" size="2xl">
+            Playground For Dine In
+          </Heading>
+          <div
+            style={{
+              marginBottom: "10px",
+              backgroundColor: "ButtonHighlight",
+              padding: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+            }}
           >
-            Add new shape
-          </Button>
-          {/* <Button onClick={() => addNewShape("circle")}>Add circle</Button>
+            <Button
+              bg="primary.main"
+              color="white"
+              onClick={onOpen}
+              variant="solid"
+            >
+              Add new shape
+            </Button>
+            {/* <Button onClick={() => addNewShape("circle")}>Add circle</Button>
           <Button onClick={() => addNewShape("rectangle")}>
             Add Rectangle
           </Button> */}
-          <Button bg="primary.main" color="white" onClick={handleInterchange}>
-            Interchange
-          </Button>
-          <Button bg="primary.main" color="white" onClick={handleDeleteObj}>
-            Delete
-          </Button>
-          <Button bg="primary.main" color="white" onClick={handleClear}>
-            Clear
-          </Button>
+            <Button bg="primary.main" color="white" onClick={handleInterchange}>
+              Interchange
+            </Button>
+            <Button bg="primary.main" color="white" onClick={handleDeleteObj}>
+              Delete
+            </Button>
+            <Button bg="primary.main" color="white" onClick={handleClear}>
+              Clear
+            </Button>
+          </div>
         </div>
       </Layer>
       <Stage
@@ -458,11 +525,8 @@ const App = () => {
         height={window.innerHeight}
         onMouseDown={checkDeselect}
         onTouchStart={checkDeselect}
+        style={{ background: "#AFB4BB" }}
       >
-        <Layer>
-          <Text text="Playground for Dine In" fontSize={20} />
-        </Layer>
-
         <Layer>
           {circles.map((circle, i) => {
             return (
@@ -539,4 +603,8 @@ const App = () => {
 
 const container = document.getElementById("root");
 const root = createRoot(container);
-root.render(<ChakraProvider theme={theme}><App /></ChakraProvider>);
+root.render(
+  <ChakraProvider theme={theme}>
+    <App />
+  </ChakraProvider>
+);

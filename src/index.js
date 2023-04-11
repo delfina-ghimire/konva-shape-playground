@@ -81,7 +81,7 @@ const MyCircle = ({
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
-
+  console.log("shapeProps", shapeProps);
   return (
     <React.Fragment>
       <Group
@@ -145,8 +145,8 @@ const MyCircle = ({
           y={shapeProps.y + shapeProps.height / 2 - 45}
         ></Text>
         <Group
-          x={shapeProps.x - shapeProps.width / 2 + 5}
-          y={shapeProps.y + shapeProps.height / 2 - 15}
+          x={shapeProps.x - shapeProps.width / 2 + 70}
+          y={shapeProps.y + shapeProps.height / 2 - 85}
           onClick={() => {
             openEditModal();
           }}
@@ -252,8 +252,8 @@ const Rectangle = ({
           y={shapeProps.y + shapeProps.height - 35}
         ></Text>
         <Group
-          x={shapeProps.x - 10}
-          y={shapeProps.y + shapeProps.height - 15}
+          x={shapeProps.x + 75}
+          y={shapeProps.y + shapeProps.height - 85}
           onClick={() => {
             openEditModal();
           }}

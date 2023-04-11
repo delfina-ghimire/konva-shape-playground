@@ -52,6 +52,7 @@ const DEFAULT_HEIGHT = 100;
 const DEFAULT_WIDTH = 100;
 const DEFAULT_RADIUS = 100;
 const DEFAULT_CAPACITY = 10;
+const DEFAULT_TABLE = "T1";
 
 const EditIcon = () => {
   const [image] = useImage("https://i.ibb.co/CK6b3GS/Edit.png");
@@ -136,7 +137,7 @@ const MyCircle = ({
           }
         />
         <Text
-          text={`T1`}
+          text={shapeProps.table}
           fontSize={12}
           fontStyle="bold"
           fontFamily="Calibri"
@@ -243,7 +244,7 @@ const Rectangle = ({
           }
         />
         <Text
-          text={`T1`}
+          text={shapeProps.table}
           fontSize={12}
           fontStyle="bold"
           fontFamily="Calibri"
@@ -283,6 +284,7 @@ const App = () => {
     width: DEFAULT_WIDTH,
     fill: "white",
     capacity: DEFAULT_CAPACITY,
+    table: DEFAULT_TABLE,
     quantity: 0,
     reserved: false,
   });
@@ -291,6 +293,7 @@ const App = () => {
     radius: DEFAULT_RADIUS,
     fill: "white",
     capacity: DEFAULT_CAPACITY,
+    table: DEFAULT_TABLE,
     quantity: 0,
     reserved: false,
   });
@@ -303,6 +306,7 @@ const App = () => {
       fill: circleShape.fill,
       id: crypto.randomUUID(),
       capacity: circleShape.capacity,
+      table: circleShape.table,
       quantity: circleShape.quantity,
       reserved: circleShape.reserved,
     },
@@ -332,6 +336,7 @@ const App = () => {
             fill: circleShape.fill,
             id: crypto.randomUUID(),
             capacity: circleShape.capacity,
+            table: circleShape.table,
             quantity: circleShape.quantity,
             reserved: circleShape.reserved,
           },
@@ -349,6 +354,7 @@ const App = () => {
             fill: rectangleShape.fill,
             id: crypto.randomUUID(),
             capacity: rectangleShape.capacity,
+            table: rectangleShape.table,
             quantity: rectangleShape.quantity,
             reserved: rectangleShape.reserved,
           },
@@ -370,6 +376,7 @@ const App = () => {
           height: circleShape.radius,
           fill: "#FFF",
           capacity: circleShape.capacity,
+          table: circleShape.table,
           quantity: circleShape.quantity,
           reserved: circleShape.reserved,
         };
@@ -388,6 +395,7 @@ const App = () => {
           height: parseInt(rectangleShape.height),
           fill: rectangleShape.fill,
           capacity: rectangleShape.capacity,
+          table: rectangleShape.table,
           quantity: rectangleShape.quantity,
           reserved: rectangleShape.reserved,
         };
@@ -504,6 +512,20 @@ const App = () => {
                       setRectangleShape((prev) => ({
                         ...prev,
                         capacity: e.target.value,
+                      }));
+                    }}
+                  />
+                </Box>
+                <Box>
+                  <FormLabel>Table Name</FormLabel>
+
+                  <Input
+                    placeholder={"T1"}
+                    type="string"
+                    onChange={(e) => {
+                      setRectangleShape((prev) => ({
+                        ...prev,
+                        table: e.target.value,
                       }));
                     }}
                   />

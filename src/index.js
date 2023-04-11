@@ -8,8 +8,9 @@ import {
   Transformer,
   Text,
   Group,
+  Image,
 } from "react-konva";
-import { extendTheme } from "@chakra-ui/react";
+import { Checkbox, extendTheme } from "@chakra-ui/react";
 import {
   Box,
   Button,
@@ -28,6 +29,7 @@ import {
   Select,
   useDisclosure,
 } from "@chakra-ui/react";
+import useImage from "use-image";
 
 const theme = extendTheme({
   colors: {
@@ -43,22 +45,32 @@ const theme = extendTheme({
 });
 
 const MIN_POS = 50;
-const MAX_POS = window.innerHeight - 100;
+const MAX_POS_Y = window.innerHeight * 0.5;
+const MAX_POS_X = window.innerWidth * 0.5;
 
 const DEFAULT_HEIGHT = 100;
 const DEFAULT_WIDTH = 100;
 const DEFAULT_RADIUS = 100;
 const DEFAULT_CAPACITY = 10;
 
-
+const EditIcon = () => {
+  const [image] = useImage("https://i.ibb.co/CK6b3GS/Edit.png");
+  return <Image image={image} height={15} width={15} />;
+};
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
  */
-function getRandomNumber() {
-  return Math.random() * (MAX_POS - MIN_POS) + MIN_POS;
+function getRandomNumber(_max) {
+  return Math.random() * (_max - MIN_POS) + MIN_POS;
 }
 
-const MyCircle = ({ shapeProps, isSelected, onSelect, onChange }) => {
+const MyCircle = ({
+  shapeProps,
+  isSelected,
+  onSelect,
+  onChange,
+  openEditModal,
+}) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
 
@@ -72,161 +84,230 @@ const MyCircle = ({ shapeProps, isSelected, onSelect, onChange }) => {
 
   return (
     <React.Fragment>
-      <Group draggable>
-        <Circle
-          x={200}
-          y={100}
-          radius={50}
-          fill="green"
-          draggable
-          onClick={onSelect}
-          onTap={onSelect}
-          ref={shapeRef}
-          {...shapeProps}
-          onDragEnd={(e) => {
-            onChange({
-              ...shapeProps,
-              x: e.target.x(),
-              y: e.target.y(),
-            });
-          }}
-          onTransformEnd={(e) => {
-            // transformer is changing scale of the node
-            // and NOT its width or height
-            // but in the store we have only width and height
-            // to match the data better we will reset scale on transform end
-            const node = shapeRef.current;
-            const scaleX = node.scaleX();
-            const scaleY = node.scaleY();
+      <Group
+        draggable
+        // x={200}
+        // y={100}
+        // radius={100}
+        onClick={onSelect}
+        onTap={onSelect}
+        ref={shapeRef}
+        {...shapeProps}
+        onDragEnd={(e) => {
+          onChange({
+            ...shapeProps,
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
+        onTransformEnd={(e) => {
+          const node = shapeRef.current;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
 
-            onChange({
-              ...shapeProps,
-              x: node.x(),
-              y: node.y(),
-              width: node.width() * scaleX,
-              height: node.height() * scaleY,
-            });
-          }}
-        />
-        {isSelected && (
-          <Transformer
-            ref={trRef}
-            rotateEnabled={false}
-            boundBoxFunc={(oldBox, newBox) => {
-              // limit resize
-
-              return newBox;
-            }}
-          />
-        )}
+          onChange({
+            ...shapeProps,
+            x: node.x(),
+            y: node.y(),
+            width: node.width() * scaleX,
+            height: node.height() * scaleY,
+          });
+        }}
+      >
+        <Circle x={200} y={100} radius={50} {...shapeProps} />
         <Text
-          text={`Capacity ${shapeProps.capacity}`}
-          fontSize={14}
+          text={`Capacity: ${shapeProps.capacity}`}
+          fontSize={10}
           fontFamily="Calibri"
           fill="gray"
-          width={shapeProps.width}
-          height={shapeProps.height}
           x={shapeProps.x - shapeProps.width / 2 + 30}
           y={shapeProps.y + shapeProps.height / 2 - 30}
         ></Text>
+        <Circle
+          x={shapeProps.x - shapeProps.width / 2 + 30}
+          y={shapeProps.y + shapeProps.height / 2 - 40}
+          radius={5}
+          fill={
+            shapeProps.reserved
+              ? "gray"
+              : shapeProps.capacity === shapeProps.quantity
+              ? "red"
+              : "green"
+          }
+        />
+        <Text
+          text={`T1`}
+          fontSize={12}
+          fontStyle="bold"
+          fontFamily="Calibri"
+          fill="gray"
+          x={shapeProps.x - shapeProps.width / 2 + 38}
+          y={shapeProps.y + shapeProps.height / 2 - 45}
+        ></Text>
+        <Group
+          x={shapeProps.x - shapeProps.width / 2 + 5}
+          y={shapeProps.y + shapeProps.height / 2 - 15}
+          onClick={() => {
+            openEditModal();
+          }}
+        >
+          <EditIcon />
+        </Group>
       </Group>
+      {isSelected && (
+        <Transformer
+          ref={trRef}
+          rotateEnabled={false}
+          boundBoxFunc={(oldBox, newBox) => {
+            return newBox;
+          }}
+        />
+      )}
     </React.Fragment>
   );
 };
 
-const Rectangle = ({ shapeProps, isSelected, onSelect, onChange }) => {
+const Rectangle = ({
+  shapeProps,
+  isSelected,
+  onSelect,
+  onChange,
+  openEditModal,
+}) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
-  const textRef = React.useRef();
 
   React.useEffect(() => {
     if (isSelected) {
-      // we need to attach transformer manually
-      trRef.current.nodes([shapeRef.current, textRef.current]);
+      trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
 
   return (
     <React.Fragment>
-      <Group draggable>
-        <Rect
-          onClick={onSelect}
-          onTap={onSelect}
-          ref={shapeRef}
-          {...shapeProps}
-          draggable
-          cornerRadius={24}
-          onDragEnd={(e) => {
-            onChange({
-              ...shapeProps,
-              x: e.target.x(),
-              y: e.target.y(),
-            });
-          }}
-          onTransformEnd={(e) => {
-            // transformer is changing scale of the node
-            // and NOT its width or height
-            // but in the store we have only width and height
-            // to match the data better we will reset scale on transform end
-            const node = shapeRef.current;
-            const scaleX = node.scaleX();
-            const scaleY = node.scaleY();
+      <Group
+        draggable
+        onClick={onSelect}
+        onTap={onSelect}
+        ref={shapeRef}
+        {...shapeProps}
+        onDragEnd={(e) => {
+          onChange({
+            ...shapeProps,
+            x: e.target.x(),
+            y: e.target.y(),
+          });
+        }}
+        onTransformEnd={(e) => {
+          const node = shapeRef.current;
+          const scaleX = node.scaleX();
+          const scaleY = node.scaleY();
 
-            // we will reset it back
-            node.scaleX(1);
-            node.scaleY(1);
-            onChange({
-              ...shapeProps,
-              x: node.x(),
-              y: node.y(),
-              // set minimal value
-              width: node.width() * scaleX,
-              height: node.height() * scaleY,
-            });
-          }}
+          onChange({
+            ...shapeProps,
+            x: node.x(),
+            y: node.y(),
+            width: node.width() * scaleX,
+            height: node.height() * scaleY,
+          });
+        }}
+      >
+        <Rect
+          x={200}
+          y={100}
+          height={DEFAULT_HEIGHT}
+          width={DEFAULT_WIDTH}
+          cornerRadius={24}
+          {...shapeProps}
         />
-        {isSelected && (
-          <Transformer
-            ref={trRef}
-            rotateEnabled={false}
-            boundBoxFunc={(oldBox, newBox) => {
-              return newBox;
-            }}
-          />
-        )}
+
         <Text
-          text={`Capacity ${shapeProps.capacity}`}
-          fontSize={14}
+          text={`Capacity: ${shapeProps.capacity}`}
+          fontSize={10}
           fontFamily="Calibri"
           fill="gray"
-          width={150}
           x={shapeProps.x + 10}
           y={shapeProps.y + shapeProps.height - 20}
-          ref={textRef}
         ></Text>
+        <Circle
+          x={shapeProps.x + 15}
+          y={shapeProps.y + shapeProps.height - 30}
+          radius={5}
+          fill={
+            shapeProps.reserved
+              ? "gray"
+              : shapeProps.capacity === shapeProps.quantity
+              ? "red"
+              : "green"
+          }
+        />
+        <Text
+          text={`T1`}
+          fontSize={12}
+          fontStyle="bold"
+          fontFamily="Calibri"
+          fill="gray"
+          x={shapeProps.x + 25}
+          y={shapeProps.y + shapeProps.height - 35}
+        ></Text>
+        <Group
+          x={shapeProps.x - 10}
+          y={shapeProps.y + shapeProps.height - 15}
+          onClick={() => {
+            openEditModal();
+          }}
+        >
+          <EditIcon />
+        </Group>
       </Group>
+      {isSelected && (
+        <Transformer
+          ref={trRef}
+          rotateEnabled={false}
+          boundBoxFunc={(oldBox, newBox) => {
+            return newBox;
+          }}
+        />
+      )}
     </React.Fragment>
   );
 };
 
 const App = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [canEdit, setCanEdit] = useState(false);
   const [rectangles, setRectangles] = React.useState([]);
-  const [circles, setCircles] = React.useState([]);
-  const [selectedShape, setSelectedShape] = React.useState("");
   const [rectangleShape, setRectangleShape] = React.useState({
     height: DEFAULT_HEIGHT,
     width: DEFAULT_WIDTH,
     fill: "white",
     capacity: DEFAULT_CAPACITY,
+    quantity: 0,
+    reserved: false,
   });
 
   const [circleShape, setCircleShape] = React.useState({
     radius: DEFAULT_RADIUS,
     fill: "white",
     capacity: DEFAULT_CAPACITY,
+    quantity: 0,
+    reserved: false,
   });
+  const [circles, setCircles] = React.useState([
+    {
+      x: 500,
+      y: 100,
+      width: circleShape.radius,
+      height: circleShape.radius,
+      fill: circleShape.fill,
+      id: crypto.randomUUID(),
+      capacity: circleShape.capacity,
+      quantity: circleShape.quantity,
+      reserved: circleShape.reserved,
+    },
+  ]);
+  const [selectedShape, setSelectedShape] = React.useState("");
 
   const [selectedObj, setSelectedObj] = React.useState({});
 
@@ -244,13 +325,15 @@ const App = () => {
         setCircles((prev) => [
           ...prev,
           {
-            x: getRandomNumber(),
-            y: getRandomNumber(),
+            x: 500,
+            y: 100,
             width: circleShape.radius,
             height: circleShape.radius,
             fill: circleShape.fill,
             id: crypto.randomUUID(),
             capacity: circleShape.capacity,
+            quantity: circleShape.quantity,
+            reserved: circleShape.reserved,
           },
         ]);
         return;
@@ -259,13 +342,15 @@ const App = () => {
         setRectangles((prev) => [
           ...prev,
           {
-            x: getRandomNumber(),
-            y: getRandomNumber(),
+            x: 500,
+            y: 100,
             width: rectangleShape.width,
             height: rectangleShape.height,
             fill: rectangleShape.fill,
             id: crypto.randomUUID(),
             capacity: rectangleShape.capacity,
+            quantity: rectangleShape.quantity,
+            reserved: rectangleShape.reserved,
           },
         ]);
         return;
@@ -273,6 +358,48 @@ const App = () => {
       default:
         return;
     }
+  };
+
+  const updateShape = (shape) => {
+    switch (shape) {
+      case "circle":
+        const _index = circles.findIndex(({ id }) => id === selectedObj.id);
+        const _circle = {
+          ...circles[_index],
+          width: circleShape.radius,
+          height: circleShape.radius,
+          fill: "#FFF",
+          capacity: circleShape.capacity,
+          quantity: circleShape.quantity,
+          reserved: circleShape.reserved,
+        };
+        const _circles = [...circles];
+        _circles[_index] = _circle;
+        setCircles([..._circles]);
+        break;
+
+      case "rectangle":
+        const _rectangleIndex = rectangles.findIndex(
+          ({ id }) => id === selectedObj.id
+        );
+        const _rectangle = {
+          ...rectangles[_rectangleIndex],
+          width: parseInt(rectangleShape.width),
+          height: parseInt(rectangleShape.height),
+          fill: rectangleShape.fill,
+          capacity: rectangleShape.capacity,
+          quantity: rectangleShape.quantity,
+          reserved: rectangleShape.reserved,
+        };
+        console.log("rec", _rectangle);
+        const _rectangles = [...rectangles];
+        _rectangles[_rectangleIndex] = _rectangle;
+        setRectangles([..._rectangles]);
+        break;
+      default:
+        break;
+    }
+    return;
   };
 
   const handleClear = () => {
@@ -303,16 +430,18 @@ const App = () => {
   };
 
   const handleInterchange = () => {
-    console.log("interchange clicked");
+    console.log("interchange clicked", selectedObj);
     switch (selectedObj.shape) {
       case "rectangle":
         handleDeleteObj("rectangle");
         setCircles((prev) => [
           ...prev,
           {
+            ...selectedObj,
             id: crypto.randomUUID(),
-            x: selectedObj.x + (selectedObj.width ?? 0) / 2,
-            y: selectedObj.y + (selectedObj.height ?? 0) / 2,
+            x: 500,
+            y: 100,
+            fill: "#fff",
           },
         ]);
         return;
@@ -334,8 +463,8 @@ const App = () => {
             id: crypto.randomUUID(),
             height: selectedObj.height ?? selectedCircle.height,
             width: selectedObj.height ?? selectedCircle.height,
-            x: selectedObj.x - (selectedObj.width ?? 0) / 2,
-            y: selectedObj.y - (selectedObj.height ?? 0) / 2,
+            x: 500,
+            y: 100,
           },
         ]);
         return;
@@ -350,7 +479,7 @@ const App = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Add new shape</ModalHeader>
+          <ModalHeader>{canEdit ? "Edit" : "Add new shape"}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Select
@@ -358,6 +487,7 @@ const App = () => {
               onChange={(e) => {
                 setSelectedShape(e.target.value);
               }}
+              value={selectedShape}
             >
               <option value="rectangle">Rectangle</option>
               <option value="circle">Circle</option>
@@ -406,36 +536,103 @@ const App = () => {
                       }}
                     />
                   </Box>
-                </Flex>
-              ) : null}
-              {selectedShape === "circle" ? (
-                <Flex flexDir="row" mt={4} gap={2} alignItems="flex-end">
                   <Box>
-                    <FormLabel>Radius</FormLabel>
+                    <FormLabel>Current size</FormLabel>
                     <Input
-                      placeholder={DEFAULT_RADIUS}
+                      placeholder={"Current Size"}
                       type="number"
                       onChange={(e) => {
-                        setCircleShape((prev) => ({
+                        setRectangleShape((prev) => ({
                           ...prev,
-                          radius: e.target.value,
+                          quantity: e.target.value,
                         }));
                       }}
                     />
                   </Box>
                   <Box>
-                    <FormLabel>Capacity</FormLabel>
+                    <FormLabel>Reserved</FormLabel>
 
-                    <Input
-                      placeholder={10}
-                      type="number"
+                    <Checkbox
+                      size="md"
+                      colorScheme="green"
+                      onChange={(e) => {
+                        setRectangleShape((prev) => ({
+                          ...prev,
+                          reserved: e.target.checked,
+                        }));
+                      }}
+                    >
+                      Checkbox
+                    </Checkbox>
+                  </Box>
+                </Flex>
+              ) : null}
+              {selectedShape === "circle" ? (
+                <Flex flexDir="column" gap={2}>
+                  <Flex flexDir="row" mt={4} gap={2} alignItems="flex-end">
+                    <Box>
+                      <FormLabel>Radius</FormLabel>
+                      <Input
+                        placeholder={
+                          canEdit ? selectedObj.width : DEFAULT_RADIUS
+                        }
+                        type="number"
+                        onChange={(e) => {
+                          setCircleShape((prev) => ({
+                            ...prev,
+                            radius: e.target.value,
+                          }));
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel>Capacity</FormLabel>
+
+                      <Input
+                        placeholder={canEdit ? selectedObj.capacity : 10}
+                        type="number"
+                        onChange={(e) => {
+                          setCircleShape((prev) => ({
+                            ...prev,
+                            capacity: e.target.value,
+                          }));
+                        }}
+                      />
+                    </Box>
+                  </Flex>
+                  <Flex flexDir="row" mt={4} gap={2} alignItems="flex-start">
+                    <Box>
+                      <FormLabel>Current Size</FormLabel>
+
+                      <Input
+                        placeholder={
+                          canEdit ? selectedObj.size : "Current Size"
+                        }
+                        type="number"
+                        onChange={(e) => {
+                          setCircleShape((prev) => ({
+                            ...prev,
+                            quantity: e.target.value,
+                          }));
+                        }}
+                      />
+                    </Box>
+                  </Flex>
+                  <Box>
+                    <FormLabel>Reserved</FormLabel>
+
+                    <Checkbox
+                      size="md"
+                      colorScheme="green"
                       onChange={(e) => {
                         setCircleShape((prev) => ({
                           ...prev,
-                          capacity: e.target.value,
+                          reserved: e.target.checked,
                         }));
                       }}
-                    />
+                    >
+                      Checkbox
+                    </Checkbox>
                   </Box>
                 </Flex>
               ) : null}
@@ -449,9 +646,17 @@ const App = () => {
               onClick={() => {
                 switch (selectedShape) {
                   case "rectangle":
+                    if (canEdit) {
+                      updateShape("rectangle");
+                      break;
+                    }
                     addNewShape("rectangle");
                     break;
                   case "circle":
+                    if (canEdit) {
+                      updateShape("circle");
+                      break;
+                    }
                     addNewShape("circle");
                     break;
                   default:
@@ -460,7 +665,7 @@ const App = () => {
                 onClose();
               }}
             >
-              Add
+              {canEdit ? "Edit" : "Add"}
             </Button>
             <Button variant="ghost" onClick={onClose}>
               Close
@@ -499,15 +704,16 @@ const App = () => {
             <Button
               bg="primary.main"
               color="white"
-              onClick={onOpen}
+              onClick={() => {
+                setCanEdit(false);
+                setSelectedShape("");
+                onOpen();
+              }}
               variant="solid"
             >
               Add new shape
             </Button>
-            {/* <Button onClick={() => addNewShape("circle")}>Add circle</Button>
-          <Button onClick={() => addNewShape("rectangle")}>
-            Add Rectangle
-          </Button> */}
+
             <Button bg="primary.main" color="white" onClick={handleInterchange}>
               Interchange
             </Button>
@@ -537,12 +743,8 @@ const App = () => {
                 onSelect={() => {
                   // console.log("hello circle", circle);
                   setSelectedObj({
-                    id: circle.id,
+                    ...circle,
                     shape: "circle",
-                    height: circle.height,
-                    width: circle.width,
-                    x: circle.x,
-                    y: circle.y,
                   });
                 }}
                 onChange={(newAttrs) => {
@@ -555,6 +757,11 @@ const App = () => {
                     x: newAttrs.x,
                     y: newAttrs.y,
                   }));
+                }}
+                openEditModal={() => {
+                  setCanEdit(true);
+                  setSelectedShape("circle");
+                  onOpen();
                 }}
               />
             );
@@ -570,18 +777,12 @@ const App = () => {
                 isSelected={rect.id === selectedObj.id}
                 onSelect={() => {
                   setSelectedObj({
-                    id: rect.id,
+                    ...rect,
                     shape: "rectangle",
-                    height: rect.height,
-                    width: rect.width,
-                    x: rect.x,
-                    y: rect.y,
                   });
                 }}
                 onChange={(newAttrs) => {
                   const rects = rectangles.slice();
-                  console.log("rect attr", newAttrs);
-
                   setSelectedObj((prev) => ({
                     ...prev,
                     height: newAttrs.height,
@@ -590,7 +791,11 @@ const App = () => {
                     y: newAttrs.y,
                   }));
                   rects[i] = newAttrs;
-                  setRectangles(rects);
+                }}
+                openEditModal={() => {
+                  setCanEdit(true);
+                  setSelectedShape("rectangle");
+                  onOpen();
                 }}
               />
             );

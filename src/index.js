@@ -482,163 +482,64 @@ const App = () => {
           <ModalHeader>{canEdit ? "Edit" : "Add new shape"}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Select
-              placeholder="Shape"
-              onChange={(e) => {
-                setSelectedShape(e.target.value);
-              }}
-              value={selectedShape}
-            >
-              <option value="rectangle">Rectangle</option>
-              <option value="circle">Circle</option>
-            </Select>
             <Box mt={5}>
-              {selectedShape === "rectangle" ? (
-                <Flex flexDir="column" mt={4} gap={2}>
-                  <Box>
-                    <FormLabel>Height</FormLabel>
-                    <Input
-                      placeholder={DEFAULT_HEIGHT}
-                      type="number"
-                      onChange={(e) => {
-                        setRectangleShape((prev) => ({
-                          ...prev,
-                          height: e.target.value,
-                        }));
-                      }}
-                    />
-                  </Box>
-                  <Box>
-                    <FormLabel>Width</FormLabel>
+              <Flex flexDir="column" mt={4} gap={2}>
+                <Select
+                  placeholder="Shape"
+                  onChange={(e) => {
+                    setSelectedShape(e.target.value);
+                  }}
+                  value={selectedShape}
+                >
+                  <option value="rectangle">Rectangle</option>
+                  <option value="circle">Circle</option>
+                </Select>
+                <Box>
+                  <FormLabel>Capacity</FormLabel>
 
-                    <Input
-                      placeholder={DEFAULT_WIDTH}
-                      type="number"
-                      onChange={(e) => {
-                        setRectangleShape((prev) => ({
-                          ...prev,
-                          width: e.target.value,
-                        }));
-                      }}
-                    />
-                  </Box>
-                  <Box>
-                    <FormLabel>Capacity</FormLabel>
+                  <Input
+                    placeholder={10}
+                    type="number"
+                    onChange={(e) => {
+                      setRectangleShape((prev) => ({
+                        ...prev,
+                        capacity: e.target.value,
+                      }));
+                    }}
+                  />
+                </Box>
+                <Box>
+                  <FormLabel>Current size</FormLabel>
+                  <Input
+                    placeholder={"Current Size"}
+                    type="number"
+                    onChange={(e) => {
+                      setRectangleShape((prev) => ({
+                        ...prev,
+                        quantity: e.target.value,
+                      }));
+                    }}
+                  />
+                </Box>
+                <Box>
+                  <FormLabel>Reserved</FormLabel>
 
-                    <Input
-                      placeholder={10}
-                      type="number"
-                      onChange={(e) => {
-                        setRectangleShape((prev) => ({
-                          ...prev,
-                          capacity: e.target.value,
-                        }));
-                      }}
-                    />
-                  </Box>
-                  <Box>
-                    <FormLabel>Current size</FormLabel>
-                    <Input
-                      placeholder={"Current Size"}
-                      type="number"
-                      onChange={(e) => {
-                        setRectangleShape((prev) => ({
-                          ...prev,
-                          quantity: e.target.value,
-                        }));
-                      }}
-                    />
-                  </Box>
-                  <Box>
-                    <FormLabel>Reserved</FormLabel>
-
-                    <Checkbox
-                      size="md"
-                      colorScheme="green"
-                      onChange={(e) => {
-                        setRectangleShape((prev) => ({
-                          ...prev,
-                          reserved: e.target.checked,
-                        }));
-                      }}
-                    >
-                      Checkbox
-                    </Checkbox>
-                  </Box>
-                </Flex>
-              ) : null}
-              {selectedShape === "circle" ? (
-                <Flex flexDir="column" gap={2}>
-                  <Flex flexDir="row" mt={4} gap={2} alignItems="flex-end">
-                    <Box>
-                      <FormLabel>Radius</FormLabel>
-                      <Input
-                        placeholder={
-                          canEdit ? selectedObj.width : DEFAULT_RADIUS
-                        }
-                        type="number"
-                        onChange={(e) => {
-                          setCircleShape((prev) => ({
-                            ...prev,
-                            radius: e.target.value,
-                          }));
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <FormLabel>Capacity</FormLabel>
-
-                      <Input
-                        placeholder={canEdit ? selectedObj.capacity : 10}
-                        type="number"
-                        onChange={(e) => {
-                          setCircleShape((prev) => ({
-                            ...prev,
-                            capacity: e.target.value,
-                          }));
-                        }}
-                      />
-                    </Box>
-                  </Flex>
-                  <Flex flexDir="row" mt={4} gap={2} alignItems="flex-start">
-                    <Box>
-                      <FormLabel>Current Size</FormLabel>
-
-                      <Input
-                        placeholder={
-                          canEdit ? selectedObj.size : "Current Size"
-                        }
-                        type="number"
-                        onChange={(e) => {
-                          setCircleShape((prev) => ({
-                            ...prev,
-                            quantity: e.target.value,
-                          }));
-                        }}
-                      />
-                    </Box>
-                  </Flex>
-                  <Box>
-                    <FormLabel>Reserved</FormLabel>
-
-                    <Checkbox
-                      size="md"
-                      colorScheme="green"
-                      onChange={(e) => {
-                        setCircleShape((prev) => ({
-                          ...prev,
-                          reserved: e.target.checked,
-                        }));
-                      }}
-                    >
-                      Checkbox
-                    </Checkbox>
-                  </Box>
-                </Flex>
-              ) : null}
+                  <Checkbox
+                    size="md"
+                    colorScheme="green"
+                    onChange={(e) => {
+                      setRectangleShape((prev) => ({
+                        ...prev,
+                        reserved: e.target.checked,
+                      }));
+                    }}
+                  >
+                    Checkbox
+                  </Checkbox>
+                </Box>
+              </Flex>
             </Box>
           </ModalBody>
-
           <ModalFooter>
             <Button
               colorScheme="blue"

@@ -275,27 +275,34 @@ const Rectangle = ({
   );
 };
 
+const DEFAULT_CIRCLE_SHAPE = {
+  radius: DEFAULT_RADIUS,
+  fill: "white",
+  capacity: DEFAULT_CAPACITY,
+  table: DEFAULT_TABLE,
+  quantity: 0,
+  reserved: false,
+};
+const DEFAULT_RECT_SHAPE = {
+  height: DEFAULT_HEIGHT,
+  width: DEFAULT_WIDTH,
+  fill: "white",
+  capacity: DEFAULT_CAPACITY,
+  table: DEFAULT_TABLE,
+  quantity: 0,
+  reserved: false,
+};
+
 const App = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [canEdit, setCanEdit] = useState(false);
   const [rectangles, setRectangles] = React.useState([]);
   const [rectangleShape, setRectangleShape] = React.useState({
-    height: DEFAULT_HEIGHT,
-    width: DEFAULT_WIDTH,
-    fill: "white",
-    capacity: DEFAULT_CAPACITY,
-    table: DEFAULT_TABLE,
-    quantity: 0,
-    reserved: false,
+    DEFAULT_RECT_SHAPE,
   });
 
   const [circleShape, setCircleShape] = React.useState({
-    radius: DEFAULT_RADIUS,
-    fill: "white",
-    capacity: DEFAULT_CAPACITY,
-    table: DEFAULT_TABLE,
-    quantity: 0,
-    reserved: false,
+    DEFAULT_CIRCLE_SHAPE,
   });
   const [circles, setCircles] = React.useState([
     {
@@ -324,6 +331,7 @@ const App = () => {
   };
 
   const addNewShape = (shape) => {
+    setCanEdit(false);
     switch (shape) {
       case "circle":
         setCircles((prev) => [
@@ -367,6 +375,7 @@ const App = () => {
   };
 
   const updateShape = (shape) => {
+    console.log("shape", shape, circleShape);
     switch (shape) {
       case "circle":
         const _index = circles.findIndex(({ id }) => id === selectedObj.id);
@@ -514,19 +523,25 @@ const App = () => {
                   <FormLabel>Capacity</FormLabel>
 
                   <Input
-                    placeholder={10}
+                    placeholder={
+                      canEdit
+                        ? selectedShape === "rectangle"
+                          ? rectangleShape.capacity
+                          : circleShape.capacity
+                        : 10
+                    }
                     type="number"
                     onChange={(e) => {
                       if (selectedShape === "rectangle") {
                         setRectangleShape((prev) => ({
                           ...prev,
-                          capacity: e.target.value,
+                          capacity: parseInt(e.target.value),
                         }));
                       }
                       if (selectedShape === "circle") {
                         setCircleShape((prev) => ({
                           ...prev,
-                          capacity: e.target.value,
+                          capacity: parseInt(e.target.value),
                         }));
                       }
                     }}
@@ -536,7 +551,13 @@ const App = () => {
                   <FormLabel>Table Name</FormLabel>
 
                   <Input
-                    placeholder={"T1"}
+                    placeholder={
+                      canEdit
+                        ? selectedShape === "rectangle"
+                          ? rectangleShape.table
+                          : circleShape.table
+                        : "T1"
+                    }
                     type="string"
                     onChange={(e) => {
                       if (selectedShape === "rectangle") {
@@ -557,19 +578,26 @@ const App = () => {
                 <Box>
                   <FormLabel>Current size</FormLabel>
                   <Input
-                    placeholder={"Current Size"}
+                    placeholder={
+                      canEdit
+                        ? selectedShape === "rectangle"
+                          ? rectangleShape.quantity
+                          : circleShape.quantity
+                        : "Current Size"
+                    }
                     type="number"
                     onChange={(e) => {
+                      console.log("sele", selectedShape);
                       if (selectedShape === "rectangle") {
                         setRectangleShape((prev) => ({
                           ...prev,
-                          quantity: e.target.value,
+                          quantity: parseInt(e.target.value),
                         }));
                       }
                       if (selectedShape === "circle") {
                         setCircleShape((prev) => ({
                           ...prev,
-                          quantity: e.target.value,
+                          quantity: parseInt(e.target.value),
                         }));
                       }
                     }}
@@ -595,6 +623,13 @@ const App = () => {
                         }));
                       }
                     }}
+                    defaultChecked={
+                      canEdit
+                        ? selectedShape === "rectangle"
+                          ? rectangleShape.reserved
+                          : circleShape.reserved
+                        : false
+                    }
                   >
                     Checkbox
                   </Checkbox>
@@ -670,6 +705,8 @@ const App = () => {
               onClick={() => {
                 setCanEdit(false);
                 setSelectedShape("");
+                setCircleShape(DEFAULT_CIRCLE_SHAPE);
+                setRectangleShape(DEFAULT_RECT_SHAPE);
                 onOpen();
               }}
               variant="solid"

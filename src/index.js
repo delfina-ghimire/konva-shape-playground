@@ -86,13 +86,9 @@ const MyCircle = ({
     <React.Fragment>
       <Group
         draggable
-        // x={200}
-        // y={100}
-        // radius={100}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
-        {...shapeProps}
         onDragEnd={(e) => {
           onChange({
             ...shapeProps,
@@ -115,7 +111,7 @@ const MyCircle = ({
           });
         }}
       >
-        <Circle x={200} y={100} radius={DEFAULT_RADIUS} {...shapeProps} />
+        <Circle radius={DEFAULT_RADIUS} {...shapeProps} />
         <Text
           text={`Capacity: ${shapeProps.capacity}`}
           fontSize={10}
@@ -192,7 +188,6 @@ const Rectangle = ({
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
-        {...shapeProps}
         onDragEnd={(e) => {
           onChange({
             ...shapeProps,
@@ -215,8 +210,6 @@ const Rectangle = ({
         }}
       >
         <Rect
-          x={200}
-          y={100}
           height={DEFAULT_HEIGHT}
           width={DEFAULT_WIDTH}
           cornerRadius={24}
@@ -297,13 +290,9 @@ const App = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [canEdit, setCanEdit] = useState(false);
   const [rectangles, setRectangles] = React.useState([]);
-  const [rectangleShape, setRectangleShape] = React.useState({
-    DEFAULT_RECT_SHAPE,
-  });
-
-  const [circleShape, setCircleShape] = React.useState({
-    DEFAULT_CIRCLE_SHAPE,
-  });
+  const [rectangleShape, setRectangleShape] =
+    React.useState(DEFAULT_RECT_SHAPE);
+  const [circleShape, setCircleShape] = React.useState(DEFAULT_CIRCLE_SHAPE);
   const [circles, setCircles] = React.useState([
     {
       x: 500,
@@ -375,7 +364,7 @@ const App = () => {
   };
 
   const updateShape = (shape) => {
-    console.log("shape", shape, circleShape);
+    console.log("del shape", shape, circleShape);
     switch (shape) {
       case "circle":
         const _index = circles.findIndex(({ id }) => id === selectedObj.id);
@@ -408,7 +397,7 @@ const App = () => {
           quantity: rectangleShape.quantity,
           reserved: rectangleShape.reserved,
         };
-        console.log("rec", _rectangle);
+        console.log("del rec", _rectangle);
         const _rectangles = [...rectangles];
         _rectangles[_rectangleIndex] = _rectangle;
         setRectangles([..._rectangles]);
@@ -447,7 +436,7 @@ const App = () => {
   };
 
   const handleInterchange = () => {
-    console.log("interchange clicked", selectedObj);
+    console.log("del interchange clicked", selectedObj);
     switch (selectedObj.shape) {
       case "rectangle":
         const _rectangles = rectangles;
@@ -488,8 +477,8 @@ const App = () => {
             id: crypto.randomUUID(),
             height: selectedObj.height,
             width: selectedObj.width,
-            x: selectedObj.x,
-            y: selectedObj.y,
+            x: selectedObj.x - selectedObj.width / 2,
+            y: selectedObj.y - selectedCircle.width / 2,
           },
         ]);
         return;
@@ -587,7 +576,7 @@ const App = () => {
                     }
                     type="number"
                     onChange={(e) => {
-                      console.log("sele", selectedShape);
+                      console.log("del selecedshape", selectedShape);
                       if (selectedShape === "rectangle") {
                         setRectangleShape((prev) => ({
                           ...prev,
@@ -740,28 +729,29 @@ const App = () => {
                 key={i}
                 shapeProps={circle}
                 isSelected={circle.id === selectedObj.id}
-                onSelect={() => {
+                onSelect={(e) => {
+                  console.log("hey e", selectedObj, e);
                   setSelectedObj((prev) => {
                     return {
                       ...circle,
                       shape: "circle",
-                      x: selectedObj.x,
-                      y: selectedObj.y,
+                      x: e.target.attrs.x,
+                      y: e.target.attrs.y,
                     };
                   });
                 }}
                 onChange={(newAttrs) => {
                   const rects = rectangles.slice();
                   rects[i] = newAttrs;
-                  console.log("new attrs", newAttrs, circle, selectedObj);
+                  console.log("del new attrs", newAttrs, circle, selectedObj);
                   setSelectedObj((prev) => ({
                     ...prev,
                     ...circle,
                     shape: "circle",
                     height: newAttrs.height,
                     width: newAttrs.width,
-                    x: Math.abs(newAttrs.x),
-                    y: Math.abs(newAttrs.y),
+                    x: newAttrs.x,
+                    y: newAttrs.y,
                   }));
                 }}
                 openEditModal={() => {
@@ -789,7 +779,12 @@ const App = () => {
                 }}
                 onChange={(newAttrs) => {
                   const rects = rectangles.slice();
-                  console.log("new attrs rect", newAttrs, rect, selectedObj);
+                  console.log(
+                    "del new attrs rect",
+                    newAttrs,
+                    rect,
+                    selectedObj
+                  );
 
                   setSelectedObj((prev) => ({
                     ...prev,

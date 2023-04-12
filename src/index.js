@@ -56,7 +56,7 @@ const DEFAULT_TABLE = "T1";
 
 const EditIcon = () => {
   const [image] = useImage("https://i.ibb.co/CK6b3GS/Edit.png");
-  return <Image image={image} height={15} width={15} />;
+  return <Image image={image} height={10} width={10} />;
 };
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
@@ -82,7 +82,6 @@ const MyCircle = ({
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
-  console.log("shapeProps", shapeProps);
   return (
     <React.Fragment>
       <Group
@@ -115,7 +114,7 @@ const MyCircle = ({
           });
         }}
       >
-        <Circle x={200} y={100} radius={50} {...shapeProps} />
+        <Circle x={200} y={100} radius={DEFAULT_RADIUS} {...shapeProps} />
         <Text
           text={`Capacity: ${shapeProps.capacity}`}
           fontSize={10}
@@ -441,15 +440,24 @@ const App = () => {
     console.log("interchange clicked", selectedObj);
     switch (selectedObj.shape) {
       case "rectangle":
-        handleDeleteObj("rectangle");
+        const _rectangles = rectangles;
+        const _filteredRectangles = _rectangles.filter(
+          (rectangle) => rectangle.id !== selectedObj.id
+        );
+        setRectangles(_filteredRectangles);
+        const selectedRectangle = _rectangles.find(
+          (rectangle) => rectangle.id === selectedObj.id
+        );
+
         setCircles((prev) => [
           ...prev,
           {
-            ...selectedObj,
+            ...selectedRectangle,
             id: crypto.randomUUID(),
-            x: 500,
-            y: 100,
-            fill: "#fff",
+            height: selectedObj.height,
+            width: selectedObj.height,
+            x: selectedObj.x + selectedObj.width / 2,
+            y: selectedObj.y + selectedObj.height / 2,
           },
         ]);
         return;
@@ -463,16 +471,15 @@ const App = () => {
         const selectedCircle = _circles.find(
           (circle) => circle.id === selectedObj.id
         );
-
         setRectangles((prev) => [
           ...prev,
           {
             ...selectedCircle,
             id: crypto.randomUUID(),
-            height: selectedObj.height ?? selectedCircle.height,
-            width: selectedObj.height ?? selectedCircle.height,
-            x: 500,
-            y: 100,
+            height: selectedObj.height,
+            width: selectedObj.width,
+            x: selectedObj.x,
+            y: selectedObj.y,
           },
         ]);
         return;
@@ -664,21 +671,27 @@ const App = () => {
                 shapeProps={circle}
                 isSelected={circle.id === selectedObj.id}
                 onSelect={() => {
-                  // console.log("hello circle", circle);
-                  setSelectedObj({
-                    ...circle,
-                    shape: "circle",
+                  setSelectedObj((prev) => {
+                    return {
+                      ...circle,
+                      shape: "circle",
+                      x: selectedObj.x,
+                      y: selectedObj.y,
+                    };
                   });
                 }}
                 onChange={(newAttrs) => {
                   const rects = rectangles.slice();
                   rects[i] = newAttrs;
+                  console.log("new attrs", newAttrs, circle, selectedObj);
                   setSelectedObj((prev) => ({
                     ...prev,
+                    ...circle,
+                    shape: "circle",
                     height: newAttrs.height,
                     width: newAttrs.width,
-                    x: newAttrs.x,
-                    y: newAttrs.y,
+                    x: Math.abs(newAttrs.x),
+                    y: Math.abs(newAttrs.y),
                   }));
                 }}
                 openEditModal={() => {
@@ -706,6 +719,8 @@ const App = () => {
                 }}
                 onChange={(newAttrs) => {
                   const rects = rectangles.slice();
+                  console.log("new attrs rect", newAttrs, rect, selectedObj);
+
                   setSelectedObj((prev) => ({
                     ...prev,
                     height: newAttrs.height,

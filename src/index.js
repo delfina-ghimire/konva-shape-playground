@@ -105,6 +105,7 @@ const MyCircle = ({
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
 
+          console.log("Transformed circle shape props", shapeProps);
           onChange({
             ...shapeProps,
             x: node.x(),
@@ -516,10 +517,18 @@ const App = () => {
                     placeholder={10}
                     type="number"
                     onChange={(e) => {
-                      setRectangleShape((prev) => ({
-                        ...prev,
-                        capacity: e.target.value,
-                      }));
+                      if (selectedShape === "rectangle") {
+                        setRectangleShape((prev) => ({
+                          ...prev,
+                          capacity: e.target.value,
+                        }));
+                      }
+                      if (selectedShape === "circle") {
+                        setCircleShape((prev) => ({
+                          ...prev,
+                          capacity: e.target.value,
+                        }));
+                      }
                     }}
                   />
                 </Box>
@@ -530,10 +539,18 @@ const App = () => {
                     placeholder={"T1"}
                     type="string"
                     onChange={(e) => {
-                      setRectangleShape((prev) => ({
-                        ...prev,
-                        table: e.target.value,
-                      }));
+                      if (selectedShape === "rectangle") {
+                        setRectangleShape((prev) => ({
+                          ...prev,
+                          table: e.target.value,
+                        }));
+                      }
+                      if (selectedShape === "circle") {
+                        setCircleShape((prev) => ({
+                          ...prev,
+                          table: e.target.value,
+                        }));
+                      }
                     }}
                   />
                 </Box>
@@ -543,10 +560,18 @@ const App = () => {
                     placeholder={"Current Size"}
                     type="number"
                     onChange={(e) => {
-                      setRectangleShape((prev) => ({
-                        ...prev,
-                        quantity: e.target.value,
-                      }));
+                      if (selectedShape === "rectangle") {
+                        setRectangleShape((prev) => ({
+                          ...prev,
+                          quantity: e.target.value,
+                        }));
+                      }
+                      if (selectedShape === "circle") {
+                        setCircleShape((prev) => ({
+                          ...prev,
+                          quantity: e.target.value,
+                        }));
+                      }
                     }}
                   />
                 </Box>
@@ -557,10 +582,18 @@ const App = () => {
                     size="md"
                     colorScheme="green"
                     onChange={(e) => {
-                      setRectangleShape((prev) => ({
-                        ...prev,
-                        reserved: e.target.checked,
-                      }));
+                      if (selectedShape === "rectangle") {
+                        setRectangleShape((prev) => ({
+                          ...prev,
+                          reserved: e.target.checked,
+                        }));
+                      }
+                      if (selectedShape === "circle") {
+                        setCircleShape((prev) => ({
+                          ...prev,
+                          reserved: e.target.checked,
+                        }));
+                      }
                     }}
                   >
                     Checkbox

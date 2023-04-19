@@ -64,12 +64,13 @@ const MyCircle = ({
   onSelect,
   onChange,
   openEditModal,
+  canEdit,
 }) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
 
   React.useEffect(() => {
-    if (isSelected) {
+    if (isSelected && canEdit) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
@@ -79,7 +80,7 @@ const MyCircle = ({
   return (
     <React.Fragment>
       <Group
-        draggable
+        draggable={canEdit}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
@@ -129,15 +130,17 @@ const MyCircle = ({
           x={shapeProps.x - shapeProps.width / 2 + 38}
           y={shapeProps.y + shapeProps.height / 2 - 45}
         ></Text>
-        <Group
-          x={shapeProps.x - shapeProps.width / 2 + 70}
-          y={shapeProps.y + shapeProps.height / 2 - 85}
-          onClick={() => {
-            openEditModal();
-          }}
-        >
-          <EditIcon />
-        </Group>
+        {!!canEdit && (
+          <Group
+            x={shapeProps.x - shapeProps.width / 2 + 70}
+            y={shapeProps.y + shapeProps.height / 2 - 85}
+            onClick={() => {
+              openEditModal();
+            }}
+          >
+            <EditIcon />
+          </Group>
+        )}
       </Group>
       {isSelected && (
         <Transformer
@@ -158,12 +161,13 @@ const Rectangle = ({
   onSelect,
   onChange,
   openEditModal,
+  canEdit,
 }) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
 
   React.useEffect(() => {
-    if (isSelected) {
+    if (isSelected && canEdit) {
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
@@ -172,7 +176,7 @@ const Rectangle = ({
   return (
     <React.Fragment>
       <Group
-        draggable
+        draggable={canEdit}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
@@ -229,17 +233,19 @@ const Rectangle = ({
           x={shapeProps.x + 25}
           y={shapeProps.y + shapeProps.height - 35}
         ></Text>
-        <Group
-          x={shapeProps.x + 75}
-          y={shapeProps.y + shapeProps.height - 85}
-          onClick={() => {
-            openEditModal();
-          }}
-        >
-          <EditIcon />
-        </Group>
+        {!!canEdit && (
+          <Group
+            x={shapeProps.x + 75}
+            y={shapeProps.y + shapeProps.height - 85}
+            onClick={() => {
+              openEditModal();
+            }}
+          >
+            <EditIcon />
+          </Group>
+        )}
       </Group>
-      {isSelected && (
+      {isSelected && canEdit && (
         <Transformer
           ref={trRef}
           rotateEnabled={false}
@@ -262,10 +268,39 @@ const DEFAULT_SHAPE = {
   reserved: false,
 };
 
-const App = () => {
+const DineIn = ({ isAdmin }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [canEdit, setCanEdit] = useState(false);
-  const [shapes, setShapes] = useState([]);
+  // TODO _previousShapes should come from backend
+  const _previousShapes = [
+    {
+      type: "rectangle",
+      x: 500,
+      y: 100,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
+      fill: "#fff",
+      id: crypto.randomUUID(),
+      capacity: DEFAULT_CAPACITY,
+      table: "T1",
+      quantity: 0,
+      reserved: false,
+    },
+    {
+      type: "circle",
+      x: 800,
+      y: 100,
+      width: DEFAULT_WIDTH,
+      height: DEFAULT_HEIGHT,
+      fill: "#fff",
+      id: crypto.randomUUID(),
+      capacity: DEFAULT_CAPACITY,
+      table: "T1",
+      quantity: 0,
+      reserved: false,
+    },
+  ];
+  const [shapes, setShapes] = useState(_previousShapes);
   const [shape, setShape] = useState(DEFAULT_SHAPE);
   const [selectedObj, setSelectedObj] = React.useState({});
 
@@ -485,40 +520,46 @@ const App = () => {
           <Heading as="h2" size="2xl">
             Playground For Dine In
           </Heading>
-          <div
-            style={{
-              marginBottom: "10px",
-              backgroundColor: "ButtonHighlight",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-            }}
-          >
-            <Button
-              bg="primary.main"
-              color="white"
-              onClick={() => {
-                setCanEdit(false);
-                setShape(DEFAULT_SHAPE);
-                onOpen();
+          {!!isAdmin && (
+            <div
+              style={{
+                marginBottom: "10px",
+                backgroundColor: "ButtonHighlight",
+                padding: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
               }}
-              variant="solid"
             >
-              Add new shape
-            </Button>
+              <Button
+                bg="primary.main"
+                color="white"
+                onClick={() => {
+                  setCanEdit(false);
+                  setShape(DEFAULT_SHAPE);
+                  onOpen();
+                }}
+                variant="solid"
+              >
+                Add new shape
+              </Button>
 
-            <Button bg="primary.main" color="white" onClick={handleInterchange}>
-              Interchange
-            </Button>
-            <Button bg="primary.main" color="white" onClick={handleDeleteObj}>
-              Delete
-            </Button>
-            <Button bg="primary.main" color="white" onClick={handleClear}>
-              Clear
-            </Button>
-          </div>
+              <Button
+                bg="primary.main"
+                color="white"
+                onClick={handleInterchange}
+              >
+                Interchange
+              </Button>
+              <Button bg="primary.main" color="white" onClick={handleDeleteObj}>
+                Delete
+              </Button>
+              <Button bg="primary.main" color="white" onClick={handleClear}>
+                Clear
+              </Button>
+            </div>
+          )}
         </div>
       </Layer>
       <Stage
@@ -536,6 +577,7 @@ const App = () => {
                 return (
                   <MyCircle
                     key={i}
+                    canEdit={isAdmin}
                     shapeProps={shape}
                     isSelected={shape.id === selectedObj.id}
                     onSelect={(e) => {
@@ -570,6 +612,7 @@ const App = () => {
                 return (
                   <Rectangle
                     key={i}
+                    canEdit={isAdmin}
                     shapeProps={shape}
                     isSelected={shape.id === selectedObj.id}
                     onSelect={(e) => {
@@ -607,6 +650,11 @@ const App = () => {
   );
 };
 
+const App = () => {
+  // TODO Update isAdmin accordingly from backend
+  const isAdmin = true;
+  return <DineIn isAdmin={isAdmin} />;
+};
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(

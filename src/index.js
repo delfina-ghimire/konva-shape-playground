@@ -83,6 +83,33 @@ const MyCircle = ({
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
+        dragBoundFunc={(pos) => {
+          let x = pos.x;
+          let y = pos.y;
+
+          // Define the boundaries where the element can be dragged
+          const minX = -window.innerWidth * 0.31;
+          const minY = -window.innerHeight * 0.06;
+          const maxX = window.innerWidth * 0.61;
+          const maxY = window.innerHeight * 0.61;
+
+          // Limit the movement of the element within the boundaries
+          if (x < minX) {
+            x = minX;
+          }
+          if (y < minY) {
+            y = minY;
+          }
+          if (x > maxX) {
+            x = maxX;
+          }
+          if (y > maxY) {
+            y = maxY;
+          }
+
+          // Return the new position of the element
+          return { x, y };
+        }}
         onDragEnd={(e) => {
           onChange({
             ...shapeProps,
@@ -176,6 +203,33 @@ const Rectangle = ({
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
+        dragBoundFunc={(pos) => {
+          let x = pos.x;
+          let y = pos.y;
+
+          // Define the boundaries where the element can be dragged
+          const minX = -window.innerWidth * 0.34;
+          const minY = -window.innerHeight * 0.125;
+          const maxX = window.innerWidth * 0.58;
+          const maxY = window.innerHeight * 0.54;
+
+          // Limit the movement of the element within the boundaries
+          if (x < minX) {
+            x = minX;
+          }
+          if (y < minY) {
+            y = minY;
+          }
+          if (x > maxX) {
+            x = maxX;
+          }
+          if (y > maxY) {
+            y = maxY;
+          }
+
+          // Return the new position of the element
+          return { x, y };
+        }}
         onDragEnd={(e) => {
           onChange({
             ...shapeProps,

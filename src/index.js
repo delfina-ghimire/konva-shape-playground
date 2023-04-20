@@ -89,7 +89,7 @@ const MyCircle = ({
           let y = pos.y;
 
           // Define the boundaries where the element can be dragged
-          const minX = -window.innerWidth * 0.31;
+          const minX = -window.innerWidth * 0.5;
           const minY = -window.innerHeight * 0.06;
           const maxX = window.innerWidth * 0.61;
           const maxY = window.innerHeight * 0.61;

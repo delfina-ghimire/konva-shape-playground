@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Stage,
@@ -65,6 +65,7 @@ const MyCircle = ({
   onChange,
   openEditModal,
   canEdit,
+  stageRef,
 }) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
@@ -84,32 +85,28 @@ const MyCircle = ({
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
-        dragBoundFunc={(pos) => {
-          let x = pos.x;
-          let y = pos.y;
+        onDragMove={() => {
+          const shape = shapeRef.current;
+          const box = shape.getClientRect();
+          const absPos = shape.getAbsolutePosition();
+          const offsetX = box.x - absPos.x;
+          const offsetY = box.y - absPos.y;
 
-          // Define the boundaries where the element can be dragged
-          const minX = -window.innerWidth * 0.5;
-          const minY = -window.innerHeight * 0.06;
-          const maxX = window.innerWidth * 0.61;
-          const maxY = window.innerHeight * 0.61;
-
-          // Limit the movement of the element within the boundaries
-          if (x < minX) {
-            x = minX;
+          const newAbsPos = { ...absPos };
+          if (box.x < 0) {
+            newAbsPos.x = -offsetX;
           }
-          if (y < minY) {
-            y = minY;
+          if (box.y < 0) {
+            newAbsPos.y = -offsetY;
           }
-          if (x > maxX) {
-            x = maxX;
+          const stage = stageRef?.current?.attrs;
+          if (box.x + box.width > stage.width) {
+            newAbsPos.x = stage.width - box.width - offsetX;
           }
-          if (y > maxY) {
-            y = maxY;
+          if (box.y + box.height > stage.height) {
+            newAbsPos.y = stage.height - box.height - offsetY;
           }
-
-          // Return the new position of the element
-          return { x, y };
+          shape.setAbsolutePosition(newAbsPos);
         }}
         onDragEnd={(e) => {
           onChange({
@@ -189,6 +186,7 @@ const Rectangle = ({
   onChange,
   openEditModal,
   canEdit,
+  stageRef,
 }) => {
   const shapeRef = React.useRef();
   const trRef = React.useRef();
@@ -207,32 +205,28 @@ const Rectangle = ({
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
-        dragBoundFunc={(pos) => {
-          let x = pos.x;
-          let y = pos.y;
+        onDragMove={() => {
+          const shape = shapeRef.current;
+          const box = shape.getClientRect();
+          const absPos = shape.getAbsolutePosition();
+          const offsetX = box.x - absPos.x;
+          const offsetY = box.y - absPos.y;
 
-          // Define the boundaries where the element can be dragged
-          const minX = -window.innerWidth * 0.34;
-          const minY = -window.innerHeight * 0.125;
-          const maxX = window.innerWidth * 0.58;
-          const maxY = window.innerHeight * 0.54;
-
-          // Limit the movement of the element within the boundaries
-          if (x < minX) {
-            x = minX;
+          const newAbsPos = { ...absPos };
+          if (box.x < 0) {
+            newAbsPos.x = -offsetX;
           }
-          if (y < minY) {
-            y = minY;
+          if (box.y < 0) {
+            newAbsPos.y = -offsetY;
           }
-          if (x > maxX) {
-            x = maxX;
+          const stage = stageRef?.current?.attrs;
+          if (box.x + box.width > stage.width) {
+            newAbsPos.x = stage.width - box.width - offsetX;
           }
-          if (y > maxY) {
-            y = maxY;
+          if (box.y + box.height > stage.height) {
+            newAbsPos.y = stage.height - box.height - offsetY;
           }
-
-          // Return the new position of the element
-          return { x, y };
+          shape.setAbsolutePosition(newAbsPos);
         }}
         onDragEnd={(e) => {
           onChange({
@@ -323,6 +317,7 @@ const DEFAULT_SHAPE = {
 };
 
 const DineIn = ({ isAdmin }) => {
+  const stageRef = useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [canEdit, setCanEdit] = useState(false);
   // TODO _previousShapes should come from backend
@@ -617,12 +612,13 @@ const DineIn = ({ isAdmin }) => {
         </div>
       </Layer>
       <Stage
+        ref={stageRef}
         width={window.innerWidth}
-        height={window.innerHeight}
+        height={window.innerHeight * 0.8}
         onMouseDown={checkDeselect}
         onTouchStart={checkDeselect}
         style={{ background: "#AFB4BB" }}
-        offset={[1, 2]}
+        offset={[-500, -500]}
       >
         <Layer>
           {shapes.map((shape, i) => {
@@ -631,6 +627,7 @@ const DineIn = ({ isAdmin }) => {
                 return (
                   <MyCircle
                     key={i}
+                    stageRef={stageRef}
                     canEdit={isAdmin}
                     shapeProps={shape}
                     isSelected={shape.id === selectedObj.id}
@@ -666,6 +663,7 @@ const DineIn = ({ isAdmin }) => {
                 return (
                   <Rectangle
                     key={i}
+                    stageRef={stageRef}
                     canEdit={isAdmin}
                     shapeProps={shape}
                     isSelected={shape.id === selectedObj.id}

@@ -6,10 +6,8 @@
 - [About](#about)
 - [Demo](#demo)
 - [Built with](#technologies)
-- [Preview](#preview)
-- [Features](#features)
-- [Run Locally](#local)
-- [Feedback](#feedback)
+
+
 
 
 <a id='background'/>

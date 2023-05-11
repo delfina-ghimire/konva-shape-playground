@@ -57,7 +57,7 @@ he Admin view allows editing of the layout, while the Viewer view is only for vi
 
 ## :link: Demo
 
-[Click to see Live Demo](https://sandbox-nft.netlify.app/)
+[Click to see Live Demo](https://floorplan-playground.netlify.app/)
 
 
 
@@ -68,63 +68,15 @@ he Admin view allows editing of the layout, while the Viewer view is only for vi
 This project was developed with the following technologies:
 
 #### **Frontend** <sub><sup>React</sup></sub>
-  - [React](https://reactjs.org/)
-  - [Tailwind CSS](https://tailwindcss.com/)
+  - [React Konva](#)
+  - [React](#)
+  - [Chakra UI] (#)
 
 
-<a id='preview'/>
-
-## :framed_picture: Preview
-
-Check out how it looks:
-
-![App Screenshot](src/assets/full-preview.png)
-
-<a id='features'/>
-
-## :fire: Salient Features
-
-- Use of Modern UX and UI
-- Tuned Multiple complex Gradients
-- soft and smooth animations
-- Reusable react functional components
-- Proper file and folder architecture 
-- Fully Responsive along all devices 
-- Cross platform
-
-<a id='local'/>
-
-## :computer: Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/clair-daisies/sandbox-NFT-marketplace.git
-```
-
-Go to the project directory
-
-```bash
-  cd my-project
-```
-
-Install dependencies
-
-```bash
-  npm install
-```
-
-Start the server
-
-```bash
-  npm run dev
-```
-
-<a id='feedback'/>
 
 ## :love_letter: Feedback
 
-If you have any feedback, please reach out to me at 
+If you have any feedback, please reach out to me at [delfina.ghimire@gmail.com](delfina.ghimire@gmail.com)
 
 
 

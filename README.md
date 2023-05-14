@@ -4,6 +4,7 @@
 
 - [Background](#background)
 - [About](#about)
+- [Preview](#preview)
 - [Demo](#demo)
 - [Built with](#technologies)
 
@@ -48,6 +49,14 @@ which is dynamically calculated.
 
 Two Views: The MVP has two different views - Admin and Viewer. T
 he Admin view allows editing of the layout, while the Viewer view is only for viewing purposes. 
+
+<a id='preview'/>
+
+## :framed_picture: Preview
+
+Check out how it looks:
+
+![App Screenshot](./frontend/src/img/signup-preview.png)
 
 
 

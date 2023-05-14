@@ -56,7 +56,7 @@ he Admin view allows editing of the layout, while the Viewer view is only for vi
 
 Check out how it looks:
 
-![App Screenshot](./frontend/src/img/signup-preview.png)
+![App Screenshot](./src/konva.png)
 
 
 

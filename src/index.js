@@ -567,7 +567,7 @@ const DineIn = ({ isAdmin }) => {
           }}
         >
           <Heading as="h2" size="2xl">
-            Playground For Dine In
+            Playground For Floorplan
           </Heading>
           {!!isAdmin && (
             <div

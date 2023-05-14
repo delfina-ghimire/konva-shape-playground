@@ -66,9 +66,9 @@ he Admin view allows editing of the layout, while the Viewer view is only for vi
 This project was developed with the following technologies:
 
 #### **Frontend** <sub><sup>React</sup></sub>
-  - [React Konva](#)
+  - [React Konva](https://konvajs.org/)
   - [React](#)
-  - [Chakra UI] (#)
+  - [Chakra UI](#)
 
 
 

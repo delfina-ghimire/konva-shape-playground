@@ -12,7 +12,7 @@
 
 <a id='background'/>
 
- ## :information_source: Background
+ ## :thought_balloon: Background
 Recently, I was given an opportunity and a challenge at work to figure out an useful technology that can help create
 a mock layout of a restaurant floorplan. I was involved in the whole process, from research and selecting a library to
 developing a Minimal Viable Product (MVP). During this journey, I stumbled upon Konva, and it has become my go to tool
